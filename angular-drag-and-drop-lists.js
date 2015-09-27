@@ -339,6 +339,7 @@ angular.module('dndLists', [])
         // Retrieve the JSON array and insert the transferred object into it.
         var targetArray = scope.$eval(attr.dndList);
         scope.$apply(function() {
+          transferredObject.date = parseInt(attr.id, 10);
           targetArray.splice(index, 0, transferredObject);
         });
         invokeCallback(attr.dndInserted, event, index, transferredObject);
