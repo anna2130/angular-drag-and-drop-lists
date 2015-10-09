@@ -7,7 +7,7 @@
  *
  * License: MIT
  */
-angular.module('dndLists', [])
+angular.module('dndLists', ['diddleplanService'])
 
   /**
    * Use the dnd-draggable attribute to make your element draggable
@@ -223,8 +223,8 @@ angular.module('dndLists', [])
    *                        by creating a child element with dndPlaceholder class.
    * - dndDragover          Will be added to the list while an element is dragged over the list.
    */
-  .directive('dndList', ['$parse', '$timeout', 'dndDropEffectWorkaround', 'dndDragTypeWorkaround',
-                 function($parse,   $timeout,   dndDropEffectWorkaround,   dndDragTypeWorkaround) {
+  .directive('dndList', ['$parse', '$timeout', 'dndDropEffectWorkaround', 'dndDragTypeWorkaround', 'TaskData',
+                 function($parse,   $timeout,   dndDropEffectWorkaround,   dndDragTypeWorkaround, TaskData) {
     return function(scope, element, attr) {
       // While an element is dragged over the list, this placeholder element is inserted
       // at the location where the element would be inserted after dropping
@@ -339,8 +339,17 @@ angular.module('dndLists', [])
         // Retrieve the JSON array and insert the transferred object into it.
         var targetArray = scope.$eval(attr.dndList);
         scope.$apply(function() {
-          transferredObject.date = attr.id ? parseInt(attr.id, 10) : undefined;
+          transferredObject.date = parseInt(attr.id, 10);
           targetArray.splice(index, 0, transferredObject);
+
+          // Call updateTask to update the database entry for this task
+          if (transferredObject.time === null ||
+              TaskData.formatTime(transferredObject.time) !== undefined) {
+
+            TaskData.updateTask(transferredObject).error(function(response) {
+              console.log(response);
+            });
+          }
         });
         invokeCallback(attr.dndInserted, event, index, transferredObject);
 
