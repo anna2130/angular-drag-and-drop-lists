@@ -342,14 +342,22 @@ angular.module('dndLists', ['diddleplanService'])
           transferredObject.date = parseInt(attr.id, 10);
           targetArray.splice(index, 0, transferredObject);
 
-          // Call updateTask to update the database entry for this task
-          if (transferredObject.time === null ||
-              TaskData.formatTime(transferredObject.time) !== undefined) {
+          var timeRe = /^\s*([01]\d|2[0-3]):([0-5]\d)\s*$/;
 
-            TaskData.updateTask(transferredObject).error(function(response) {
-              console.log(response);
-            });
+          if (transferredObject.time !== null && transferredObject.time !== "") {
+            if (!transferredObject.time.match(timeRe)) {
+              transferredObject.time = null;
+            }
+          } else if (transferredObject.time === "") {
+            transferredObject.time = null;
           }
+
+          transferredObject.validTime = true;
+
+          // Call updateTask to update the database entry for this task
+          TaskData.updateTask(transferredObject).error(function(response) {
+            console.log(response);
+          });
         });
         invokeCallback(attr.dndInserted, event, index, transferredObject);
 
